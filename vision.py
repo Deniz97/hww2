@@ -166,7 +166,7 @@ def randomize_parameters():
     global DENSE_STEP_SIZE
     DENSE_STEP_SIZE = generate_random(3,20,0.2,10,intmi=True) #default 10
     global K_MEANS_K
-    K_MEANS_K = choice([16,32,64,128,256])
+    K_MEANS_K = choice([4,8,16,32,64,128,256])
     global KNN_K
     KNN_K = choice([2,4,8,16,32,64])
     global SIFT_TYPE
@@ -279,8 +279,8 @@ def extract_features_of_image(img,sift = None):
 
     if SIFT_TYPE=="sift":
         kp = sift.detect(img,None)
-        if(len(kp) < 5 ):
-            print("Found an image with %d keypoints" % len(kp))
+        if(len(kp) < 1 ):
+            #print("Found an image with %d keypoints" % len(kp))
             kp = [cv2.KeyPoint(x, y, 100) for y in range(0, img.shape[0], 100) 
                                                 for x in range(0, img.shape[1], 100)]
     elif SIFT_TYPE=="dense_sift":
@@ -384,11 +384,9 @@ def kmeans_and_save_clusters_and_save_bofs(all_features,names,counts):
         
         temp = labels[curr_count:curr_count+counts[img_index]].astype(np.float32)
         bof_vector = np.histogram(temp, bins=np.arange(number_of_clusters+1),density=True)[0]
+        bof_vector = bof_vector/np.sum(bof_vector)
         curr_count+=counts[img_index]
-        ####slice the image name
-        img_name = names[img_index]
-        img_name = img_name[img_name.rfind("/")+1:]
-        ###
+
 
         all_bof_vectors[img_index] = bof_vector 
         
@@ -413,15 +411,13 @@ def extract_bof(img_name,all_bof_vectors = None):
     bof_filename = get_bof_filename()
 
     curr_image_gray = cv2.imread(img_name,0) #0=read image as gray
-    features = extract_features(curr_image_gray)
+    features = extract_features_of_image(curr_image_gray)
 
     with open(kmeans_filename,"rb") as filem:
         kmeans = pc.load(filem)
         if(features.shape[0]!=0):
             current_bof_vector = kmeans.predict(features).astype(np.float32)
             current_bof_vector = np.histogram(current_bof_vector, bins=np.arange(K_MEANS_K+1),density=True)[0]
-            #normalize
-            current_bof_vector /= features.shape[0]
         else:
             print("PROBLEM")
             current_bof_vector = np.zeros((kmeans.cluster_centers_.shape[0],))
