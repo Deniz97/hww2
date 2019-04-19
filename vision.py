@@ -192,22 +192,12 @@ def randomize_parameters():
 def log_results(save_to="k",log=True):
     
     global to_write
-    to_write["K_MEANS_K"] = K_MEANS_K
-    to_write["KNN_K"] = KNN_K
 
-    name = "val_"+name
-    convert_for_eval.mainn(["filler",name])
-    converted_filename = "converted_"+name
-    map_score = compute_map.mainn(["filer",converted_filename,"./src/validation_gt.dat"])
-
-
-
-    if log==False:
-        return
-    with open("result_log_"+save_to+"_proper.txt","a") as filem:
-        filem.write("Best Score : %f \n" % map_score )
-        filem.write("Params : %s \n" % str(to_write) )
-        filem.write("Used k : %d \n\n\n" % K_MEANS_K )
+    with open("result_log.txt","a") as filem:
+        filem.write("\nParams : %s \n" % str(to_write) )
+        filem.write("-------------" )
+    with open("result_log.p","wb") as filem:
+        pc.dump(to_write,filem)
 
 
 
@@ -235,21 +225,6 @@ def get_result_filename():
         exit()
     return feat_filename
 
-def get_all_result_filenames():
-    retval = [0]*10
-    
-    retval[0] = "result_32.txt"
-    retval[1] = "result_64.txt"
-    retval[2] = "result_128.txt"
-    retval[3] = "result_256.txt"
-    retval[4] = "result_512.txt"
-    retval[5] = "dense_result_32.txt"
-    retval[6] = "dense_result_64.txt"
-    retval[7] = "dense_result_128.txt"
-    retval[8] = "dense_result_256.txt"
-    retval[9] = "dense_result_512.txt"
-
-    return retval
 
 def get_bof_filename():
     if SIFT_TYPE=="sift":
@@ -297,8 +272,7 @@ def eucledian(v1,v2):
     return np.linalg.norm(v1-v2)
 
 
-
-def extract_features(img,sift = None):
+def extract_features_of_image(img,sift = None):
     
     if(sift is None):
         sift = cv2.xfeatures2d.SIFT_create(nfeatures = _nfeatures, nOctaveLayers=_nOctaveLayers,\
@@ -327,7 +301,7 @@ def extract_features(img,sift = None):
     
     return vector
 
-def extract_feature_vectors():
+def extract_all_feature_vectors():
     pic_names_array = get_image_names()
     
     feat_filename = get_feat_filename()
@@ -341,7 +315,7 @@ def extract_feature_vectors():
             #if(index%100==0):
             #   print("Feature extracted %d images" % index)
             curr_image_gray = cv2.imread(pic,0) #0=read image as gray
-            features = extract_features(curr_image_gray,sift)
+            features = extract_features_of_image(curr_image_gray,sift)
             number_of_features += features.shape[0]
             #features = list(features)
             #map(lambda x:list(x),features)
@@ -501,9 +475,10 @@ def query_validation_set():
                 if gt_label == val_preds[index]:
                     true_preds += 1
                 res_file.write(curr_val_image_path+": "+val_preds[index]+'\n')
-    print(true_preds)
-    print(val_preds.shape[0])
+
     print("Accuracy: %f" % (true_preds*100/val_preds.shape[0]) )
+    global to_write
+    to_write["val_score"] = true_preds*100/val_preds.shape[0]
 
     
 def full_pipeline(k=-1):
@@ -516,7 +491,7 @@ def full_pipeline(k=-1):
     print("K= ",K_MEANS_K)
     image_names = get_image_names()
     
-    total_feature_count,image_names = extract_feature_vectors()
+    total_feature_count,image_names = extract_all_feature_vectors()
 
     if SIFT_TYPE=="sift":
         to_write["total_feature_count-sift"] = total_feature_count
