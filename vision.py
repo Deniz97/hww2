@@ -42,8 +42,6 @@ to_write["reassignment_ratio"] = _reassignment_ratio
 to_write["batch_size"] = _batch_size
 to_write["step-size"] = DENSE_STEP_SIZE
 
-####### Does your editor supports this: ẖ̸̢̧̼̤̼̱͖͔̯̙͑̅͌̽̀͗̂̍̾͐͝e̶̪̠͕̮͋́͛̔̃̆́̍́͝l̷̢̧̝̣̯̓̉̀̾̆̉͋̍̾͜͠͠͝͝l̵̡̬̘̹̯̮̣̅̿̐̅̀͛̉̒̃̂̃̈͝͝ỏ̴̻̦̪͎͓̫͇̺̜͕̣̒̄̌̌͌̇̿͘͜͝
-####### mine does, haha
 
 ####### joke aside, dont go below, you have been warned
 
